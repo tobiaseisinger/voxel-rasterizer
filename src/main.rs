@@ -1,5 +1,7 @@
 extern crate sdl2;
 mod vertex;
+mod renderer;
+mod helper;
 
 use sdl2::pixels::{Color, PixelFormat, PixelFormatEnum};
 use sdl2::event::Event;
@@ -7,6 +9,7 @@ use sdl2::keyboard::Keycode;
 use sdl2::render::{TextureAccess, TextureCreator};
 use std::time::{Duration, Instant};
 use vertex::Vertex;
+use renderer::Renderer;
 
 
 const WINDOW_WIDTH: usize = 800;
@@ -32,8 +35,7 @@ pub fn main() {
         .create_texture(PixelFormatEnum::ARGB8888, TextureAccess::Streaming, GAME_WIDTH as u32, GAME_HEIGHT as u32)
         .unwrap();
 
-    // Pixel Buffer with the size of WIDTH * HEIGHT
-    let mut pixel_buffer = vec![0u32; GAME_WIDTH * GAME_HEIGHT];
+    let mut renderer = Renderer::new();
     
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut last_time = Instant::now();
@@ -63,34 +65,18 @@ pub fn main() {
         }
 
         // clearing the buffer
-        pixel_buffer.fill(rgb(0, 0, 0));
+        renderer.clear();
     
         // drawing a vector
-        let vec_color = rgb(255, 255, 255);
-
-        vertices[0].x = (total_time.cos() * 2.0);
-        vertices[0].y = (total_time.sin() * 2.0);
-        vertices[0].z = 5.0;
+        let vec_color = helper::rgb(255, 255, 255);
 
         for v in vertices.iter_mut() {
             let (v_x, v_y) = v.project();
 
-            if v_x >= 0 && v_x < GAME_WIDTH as i32 && v_y >= 0 && v_y < GAME_HEIGHT as i32 {
-                let offset = (v_y as usize) * GAME_WIDTH + (v_x as usize);
-                pixel_buffer[offset] = vec_color;
-            }
+            renderer.draw_pixel(v_x, v_y, vec_color);
         }
 
-
-
-        let u8_slice = unsafe {
-            std::slice::from_raw_parts(
-                pixel_buffer.as_ptr() as *const u8,
-                pixel_buffer.len() * 4
-            )
-        };
-
-        texture.update(None, u8_slice, GAME_WIDTH * 4).unwrap();
+        texture.update(None, renderer.as_u8_slice(), GAME_WIDTH * 4).unwrap();
 
         canvas.clear();
         canvas.copy(&texture, None, None);
@@ -100,7 +86,3 @@ pub fn main() {
     }
 }
 
-
-fn rgb(r: u32, g: u32, b: u32) -> u32 {
-    0xFF000000 | (r << 16) | (g << 8) | b
-}
