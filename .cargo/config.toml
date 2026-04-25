@@ -1,0 +1,7 @@
+# Pfad für 64-Bit Windows
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-L", "native=lib/x64"]
+
+# Pfad für 32-Bit Windows
+[target.i686-pc-windows-msvc]
+rustflags = ["-L", "native=lib/x86"]
