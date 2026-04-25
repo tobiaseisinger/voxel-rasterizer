@@ -1,15 +1,19 @@
 extern crate sdl2;
+mod vertex;
 
 use sdl2::pixels::{Color, PixelFormat, PixelFormatEnum};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::render::{TextureAccess, TextureCreator};
 use std::time::{Duration, Instant};
+use vertex::Vertex;
+
 
 const WINDOW_WIDTH: usize = 800;
 const WINDOW_HEIGHT: usize = 600;
 const GAME_WIDTH: usize = 320;
 const GAME_HEIGHT: usize = 240;
+const FOV: usize = 70;
 
 
 pub fn main() {
@@ -35,6 +39,10 @@ pub fn main() {
     let mut last_time = Instant::now();
     let mut total_time: f32 = 0.0;
 
+    let mut vertices: Vec<Vertex> = Vec::new();
+
+    vertices.push(Vertex::new(1.0, 1.0, 1.0));
+
     // game loop
     'running: loop {
         let now = Instant::now();
@@ -53,22 +61,27 @@ pub fn main() {
                 _ => {}
             }
         }
-        
 
-        // loop for filling the buffer
-        for y in 0..GAME_HEIGHT {
-            for x in 0..GAME_WIDTH {
-                let offset = y * GAME_WIDTH + x;
-                
-                let r = (x % 255) as u32;
-                let g = (y % 255) as u32;
-                let b = ((total_time.sin() * 0.5 + 0.5) * 255.0) as u32;
+        // clearing the buffer
+        pixel_buffer.fill(rgb(0, 0, 0));
+    
+        // drawing a vector
+        let vec_color = rgb(255, 255, 255);
 
-                let color = rgb(r, g, b);
+        vertices[0].x = (total_time.cos() * 2.0);
+        vertices[0].y = (total_time.sin() * 2.0);
+        vertices[0].z = 5.0;
 
-                pixel_buffer[offset] = color;
+        for v in vertices.iter_mut() {
+            let (v_x, v_y) = v.project();
+
+            if v_x >= 0 && v_x < GAME_WIDTH as i32 && v_y >= 0 && v_y < GAME_HEIGHT as i32 {
+                let offset = (v_y as usize) * GAME_WIDTH + (v_x as usize);
+                pixel_buffer[offset] = vec_color;
             }
         }
+
+
 
         let u8_slice = unsafe {
             std::slice::from_raw_parts(
