@@ -1,3 +1,5 @@
+use sdl2::render;
+
 use crate::{FOV, GAME_HEIGHT, GAME_WIDTH, helper, vertex::Vertex};
 
 pub struct Renderer {
@@ -47,6 +49,47 @@ impl Renderer {
             if e2 <= dx {
                 err += dx;
                 curr_y += sy;
+            }
+        }
+    }
+
+    pub fn draw_filled_triangle(&mut self, mut v1: (i32, i32), mut v2: (i32, i32), mut v3: (i32, i32), color: u32) {
+        let mut x_left:Vec<i32> = Vec::new();
+        let mut x_right:Vec<i32> = Vec::new();
+
+        let mut vertices = vec![
+            v1, v2, v3
+        ];
+
+        vertices.sort_by(|v1, v2| v1.1.cmp(&v2.1));
+
+        let p0 = vertices[0];
+        let p1 = vertices[1];
+        let p2 = vertices[2];
+
+        let x01 = helper::interpolate(p0.1, p0.0, p1.1, p1.0);
+        let x12 = helper::interpolate(p1.1, p1.0, p2.1, p2.0);
+        let x02 = helper::interpolate(p0.1, p0.0, p2.1, p2.0);
+
+        let mut x012 = x01;
+        x012.pop();
+        x012.extend(x12);
+
+        let m = x02.len() / 2;
+        if x02[m] < x012[m] {
+            x_left = x02;
+            x_right = x012
+        } else {
+            x_left = x012;
+            x_right = x02;
+        }
+
+        for (i, y) in (p0.1..=p2.1).enumerate() {
+            let start_x = x_left[i];
+            let end_x = x_right[i];
+            
+            for x in start_x..=end_x {
+                self.draw_pixel(x, y, color);
             }
         }
     }
