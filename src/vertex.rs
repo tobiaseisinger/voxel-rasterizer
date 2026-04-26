@@ -1,5 +1,6 @@
 use crate::{FOV, GAME_HEIGHT, GAME_WIDTH};
 
+#[derive(Clone, Copy)]
 pub struct Vertex {
     pub x: f32,
     pub y: f32,

@@ -2,6 +2,7 @@ extern crate sdl2;
 mod vertex;
 mod renderer;
 mod helper;
+mod block;
 
 use sdl2::pixels::{Color, PixelFormat, PixelFormatEnum};
 use sdl2::event::Event;
@@ -10,6 +11,7 @@ use sdl2::render::{TextureAccess, TextureCreator};
 use std::time::{Duration, Instant};
 use vertex::Vertex;
 use renderer::Renderer;
+use block::Block;
 
 
 const WINDOW_WIDTH: usize = 800;
@@ -44,6 +46,9 @@ pub fn main() {
     let mut vertices: Vec<Vertex> = Vec::new();
 
     vertices.push(Vertex::new(1.0, 1.0, 1.0));
+    vertices.push(Vertex::new(0.0, 1.0, 2.0));
+
+    let mut block = Block::new();
 
     // game loop
     'running: loop {
@@ -70,11 +75,9 @@ pub fn main() {
         // drawing a vector
         let vec_color = helper::rgb(255, 255, 255);
 
-        for v in vertices.iter_mut() {
-            let (v_x, v_y) = v.project();
 
-            renderer.draw_pixel(v_x, v_y, vec_color);
-        }
+        block.update(total_time);
+        block.render(&mut renderer, vec_color);
 
         texture.update(None, renderer.as_u8_slice(), GAME_WIDTH * 4).unwrap();
 
