@@ -41,11 +41,13 @@ impl Block {
     }
 
     pub fn render(&self, renderer: &mut Renderer, color: u32) {
-        let mut visible_faces: Vec<(f32, [usize; 3])> = Vec::new();
+        let mut visible_faces: Vec<(f32, [usize; 3], Vertex)> = Vec::new();
 
         let light = Vertex::new(-1.0, -2.0, -1.5);
         let len = (light.x*light.x + light.y*light.y + light.z*light.z).sqrt();
         let light = Vertex::new(light.x/len, light.y/len, light.z/len);
+
+        
 
         for face in &self.indices {
             let v1 = &self.current_vertices[face[0]];
@@ -57,20 +59,27 @@ impl Block {
             let a = Vertex::new(v2.x - v1.x, v2.y - v1.y, v2.z - v1.z);
             let b = Vertex::new(v3.x - v1.x, v3.y - v1.y, v3.z - v1.z);
             let normal_vec = Vertex::cross(a, b);
-            let dot = normal_vec.x * v1.x + normal_vec.y * v1.y + normal_vec.z * v1.z;
+
+            let dot = normal_vec.x * v1.x + normal_vec.y * v1.y + normal_vec.z * v1.z;            
 
             if dot > 0.0 {
                 let avg_z = (v1.z + v2.z + v3.z) / 3.0;
-                visible_faces.push((avg_z, *face));
+                let len = (normal_vec.x*normal_vec.x + normal_vec.y*normal_vec.y + normal_vec.z +normal_vec.z).sqrt();
+                let normal = Vertex::new(normal_vec.x/len, normal_vec.y/len, normal_vec.z/len);
+                visible_faces.push((avg_z, *face, normal));
             }
         }
 
         visible_faces.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap());
 
-        for (_, face) in &visible_faces {
+        for (_, face, normal) in &visible_faces {
             let v1 = &self.current_vertices[face[0]];
             let v2 = &self.current_vertices[face[1]];
             let v3 = &self.current_vertices[face[2]];
+
+            let dot_light = (normal.x*light.x + normal.y*light.y + normal.z*light.z).max(0.0);
+            let intensity = 0.15 + 0.85 * dot_light;
+            
 
             renderer.draw_filled_triangle(v1.project(), v2.project(), v3.project(), color);
         }
