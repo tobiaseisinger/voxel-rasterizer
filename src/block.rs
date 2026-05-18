@@ -20,17 +20,17 @@ impl Block {
 
         let indices = vec![
             // Front (Z = -1)
-            [0, 2, 1], [0, 3, 2],
+            [0, 1, 2], [0, 2, 3],
             // Back (Z = 1)
-            [4, 5, 6], [4, 6, 7],
+            [4, 6, 5], [4, 7, 6],
             // Left (X = -1)
-            [0, 1, 5], [0, 5, 4],
+            [0, 5, 1], [0, 4, 5],
             // Right (X = 1)
-            [2, 3, 7], [2, 7, 6],
+            [2, 7, 3], [2, 6, 7],
             // Top (Y = 1)
-            [3, 0, 4], [3, 4, 7],
+            [3, 4, 0], [3, 7, 4],
             // Bottom (Y = -1)
-            [1, 2, 6], [1, 6, 5]
+            [1, 6, 2], [1, 5, 6]
         ];
 
         Self {
@@ -43,11 +43,9 @@ impl Block {
     pub fn render(&self, renderer: &mut Renderer, color: u32) {
         let mut visible_faces: Vec<(f32, [usize; 3], Vertex)> = Vec::new();
 
-        let light = Vertex::new(-1.0, -2.0, -1.5);
+        let light = Vertex::new(0.0, 0.0, 0.5);
         let len = (light.x*light.x + light.y*light.y + light.z*light.z).sqrt();
         let light = Vertex::new(light.x/len, light.y/len, light.z/len);
-
-        
 
         for face in &self.indices {
             let v1 = &self.current_vertices[face[0]];
