@@ -84,11 +84,11 @@ impl Renderer {
             x_right = x02;
         }
 
-        for (i, y) in (p0.1..=p2.1).enumerate() {
+        for (i, y) in (p0.1..p2.1).enumerate() {
             let start_x = x_left[i];
             let end_x = x_right[i];
             
-            for x in start_x..=end_x {
+            for x in start_x..end_x {
                 self.draw_pixel(x, y, color);
             }
         }

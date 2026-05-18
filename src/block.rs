@@ -19,18 +19,18 @@ impl Block {
         ];
 
         let indices = vec![
-            // Front
-            [0, 1, 2], [0, 2, 3],
-            // Back
+            // Front (Z = -1)
+            [0, 2, 1], [0, 3, 2],
+            // Back (Z = 1)
             [4, 5, 6], [4, 6, 7],
-            // Left
-            [0, 3, 7], [0, 7, 4],
-            // Right
-            [1, 2, 6], [1, 6, 5],
-            // Top
-            [3, 2, 6], [3, 6, 7],
-            // Bottom
-            [0, 1, 5], [0, 5, 4]
+            // Left (X = -1)
+            [0, 1, 5], [0, 5, 4],
+            // Right (X = 1)
+            [2, 3, 7], [2, 7, 6],
+            // Top (Y = 1)
+            [3, 0, 4], [3, 4, 7],
+            // Bottom (Y = -1)
+            [1, 2, 6], [1, 6, 5]
         ];
 
         Self {
@@ -41,16 +41,34 @@ impl Block {
     }
 
     pub fn render(&self, renderer: &mut Renderer, color: u32) {
+        let mut visible_faces: Vec<(f32, [usize; 3])> = Vec::new();
+
         for face in &self.indices {
             let v1 = &self.current_vertices[face[0]];
             let v2 = &self.current_vertices[face[1]];
             let v3 = &self.current_vertices[face[2]];
 
-            let p1 = v1.project();
-            let p2 = v2.project();
-            let p3 = v3.project();
+            if v1.z <= 0.0 || v2.z <= 0.0 || v3.z <= 0.0 { continue; }
 
-            renderer.draw_filled_triangle(p1, p2, p3, color);
+            let a = Vertex::new(v2.x - v1.x, v2.y - v1.y, v2.z - v1.z);
+            let b = Vertex::new(v3.x - v1.x, v3.y - v1.y, v3.z - v1.z);
+            let normal_vec = Vertex::cross(a, b);
+            let dot = normal_vec.x * v1.x + normal_vec.y * v1.y + normal_vec.z * v1.z;
+
+            if dot > 0.0 {
+                let avg_z = (v1.z + v2.z + v3.z) / 3.0;
+                visible_faces.push((avg_z, *face));
+            }
+        }
+
+        visible_faces.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap());
+
+        for (_, face) in &visible_faces {
+            let v1 = &self.current_vertices[face[0]];
+            let v2 = &self.current_vertices[face[1]];
+            let v3 = &self.current_vertices[face[2]];
+
+            renderer.draw_filled_triangle(v1.project(), v2.project(), v3.project(), color);
         }
     }
     
