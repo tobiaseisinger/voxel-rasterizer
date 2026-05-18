@@ -62,7 +62,7 @@ impl Block {
 
             if dot > 0.0 {
                 let avg_z = (v1.z + v2.z + v3.z) / 3.0;
-                let len = (normal_vec.x*normal_vec.x + normal_vec.y*normal_vec.y + normal_vec.z +normal_vec.z).sqrt();
+                let len = (normal_vec.x*normal_vec.x + normal_vec.y*normal_vec.y + normal_vec.z*normal_vec.z).sqrt();
                 let normal = Vertex::new(normal_vec.x/len, normal_vec.y/len, normal_vec.z/len);
                 visible_faces.push((avg_z, *face, normal));
             }
