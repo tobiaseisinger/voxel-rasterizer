@@ -21,3 +21,10 @@ pub fn interpolate(y0: i32, v0: i32, y1: i32, v1: i32) -> Vec<i32> {
     }
     values
 }
+
+pub fn apply_intensity(color: u32, intensity: f32) -> u32 {
+    let r = ((color >> 16) & 0xFF) as f32 * intensity;
+    let g = ((color >> 8)  & 0xFF) as f32 * intensity;
+    let b =  (color        & 0xFF) as f32 * intensity;
+    rgb(r as u8, g as u8, b as u8)
+}

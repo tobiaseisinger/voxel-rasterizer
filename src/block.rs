@@ -1,4 +1,4 @@
-use crate::{renderer::Renderer, vertex::Vertex};
+use crate::{helper, renderer::Renderer, vertex::Vertex};
 
 pub struct Block {
     base_vertices: Vec<Vertex>,
@@ -79,9 +79,9 @@ impl Block {
 
             let dot_light = (normal.x*light.x + normal.y*light.y + normal.z*light.z).max(0.0);
             let intensity = 0.15 + 0.85 * dot_light;
-            
+            let shaded = helper::apply_intensity(color, intensity);
 
-            renderer.draw_filled_triangle(v1.project(), v2.project(), v3.project(), color);
+            renderer.draw_filled_triangle(v1.project(), v2.project(), v3.project(), shaded);
         }
     }
     
