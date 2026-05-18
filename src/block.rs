@@ -43,6 +43,10 @@ impl Block {
     pub fn render(&self, renderer: &mut Renderer, color: u32) {
         let mut visible_faces: Vec<(f32, [usize; 3])> = Vec::new();
 
+        let light = Vertex::new(-1.0, -2.0, -1.5);
+        let len = (light.x*light.x + light.y*light.y + light.z*light.z).sqrt();
+        let light = Vertex::new(light.x/len, light.y/len, light.z/len);
+
         for face in &self.indices {
             let v1 = &self.current_vertices[face[0]];
             let v2 = &self.current_vertices[face[1]];
