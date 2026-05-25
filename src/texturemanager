@@ -1,0 +1,7 @@
+struct TextureManager {
+    texture_path: string
+}
+
+impl TextureManager {
+    
+}
